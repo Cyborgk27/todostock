@@ -5,9 +5,10 @@ import { DataTable } from './components/data-table/data-table';
 import { SinglePagination } from './components/single-pagination/single-pagination';
 import { CustomInput } from './components/custom-input/custom-input';
 import { FormsModule } from '@angular/forms';
+import { CustomModal } from './components/custom-modal/custom-modal';
 
 @NgModule({
-  declarations: [DataFilter, DataTable, SinglePagination, CustomInput],
+  declarations: [DataFilter, DataTable, SinglePagination, CustomInput, CustomModal],
   imports: [CommonModule, CurrencyPipe, DatePipe, FormsModule],
   exports: [DataFilter, DataTable, SinglePagination, CustomInput],
 })

@@ -1,0 +1,25 @@
+@if (isOpen()) {
+  <div class="modal modal-open backdrop-blur-sm transition-all duration-300 animate-fadeIn">
+    <div class="modal-box bg-base-100 border border-base-300 shadow-2xl relative max-w-lg w-full">
+      
+      <div class="flex items-center justify-between border-b border-base-300 pb-3 mb-4">
+        <h3 class="text-lg font-black tracking-tight text-base-content">
+          {{ title() }}
+        </h3>
+        
+        <button 
+          (click)="closeModal()" 
+          class="btn btn-sm btn-circle btn-ghost text-base-content/50 hover:text-error hover:bg-error/10 transition-colors">
+          <i class="pi pi-times text-sm"></i>
+        </button>
+      </div>
+
+      <div class="py-2 text-sm text-base-content/80">
+        <ng-content></ng-content>
+      </div>
+
+    </div>
+
+    <div class="modal-backdrop bg-black/60 fixed inset-0 -z-10" (click)="closeModal()"></div>
+  </div>
+}
