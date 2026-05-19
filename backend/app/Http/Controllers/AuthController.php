@@ -34,10 +34,14 @@ class AuthController extends Controller
                     properties: [
                         new OA\Property(property: "access_token", type: "string", example: "1|7zK9gR..."),
                         new OA\Property(property: "token_type", type: "string", example: "Bearer"),
-                        new OA\Property(property: "user", properties: [
-                            new OA\Property(property: "name", type: "string", example: "Admin Todotek"),
-                            new OA\Property(property: "email", type: "string", example: "admin@todotek.com")
-                        ], type: "object")
+                        new OA\Property(
+                            property: "user",
+                            type: "object",
+                            properties: [
+                                new OA\Property(property: "name", type: "string", example: "Admin Todotek"),
+                                new OA\Property(property: "email", type: "string", format: "email", example: "admin@todotek.com")
+                            ]
+                        )
                     ]
                 )
             ),
@@ -91,7 +95,7 @@ class AuthController extends Controller
         description: "Revoca y elimina el token de acceso actual del usuario autenticado para invalidar la sesión.",
         operationId: "authLogout",
         tags: ["Autenticación"],
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         responses: [
             new OA\Response(
                 response: 200,
