@@ -1,0 +1,9 @@
+<div class="relative rounded-md shadow-sm max-w-md">
+  <input
+    type="text"
+    [value]="searchQuery()"
+    (input)="onInputChange($event)"
+    class="w-full rounded-md border-gray-300 pr-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+    placeholder="Buscar..."
+  />
+</div>

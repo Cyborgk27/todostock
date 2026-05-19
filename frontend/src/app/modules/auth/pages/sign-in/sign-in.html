@@ -1,0 +1,54 @@
+<div class="min-h-screen flex items-center justify-center bg-base-200 px-4">
+  <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-300">
+    <div class="card-body">
+      
+      <div class="text-center mb-4">
+        <h1 class="text-3xl font-bold text-primary">TodoStock</h1>
+        <p class="text-sm text-base-content/60 mt-1">Ingresa tus credenciales de acceso</p>
+      </div>
+
+      @if (authFacade.errorMessage()) {
+        <div class="alert alert-error shadow-sm py-3 mb-2 rounded-md animate-fade-in">
+          <i class="bi bi-exclamation-triangle-fill text-lg"></i>
+          <span class="text-sm font-medium">{{ authFacade.errorMessage() }}</span>
+        </div>
+      }
+
+      <form (submit)="onLoginSubmit($event)" class="space-y-4">
+        
+        <app-custom-input
+          label="Correo Electrónico"
+          type="email"
+          placeholder="admin@todotek.com"
+          icon="pi pi-envelope"
+          [required]="true"
+          [(value)]="email">
+        </app-custom-input>
+
+        <app-custom-input
+          label="Contraseña"
+          type="password"
+          placeholder="••••••••"
+          icon="pi pi-lock"
+          [required]="true"
+          [(value)]="password">
+        </app-custom-input>
+
+        <div class="form-control mt-6">
+          <button 
+            type="submit" 
+            [disabled]="authFacade.isLoading() || !email() || !password()"
+            class="btn btn-primary w-full text-white">
+            @if (authFacade.isLoading()) {
+              <span class="loading loading-spinner loading-sm"></span>
+              Autenticando...
+            } @else {
+              Iniciar Sesión
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
