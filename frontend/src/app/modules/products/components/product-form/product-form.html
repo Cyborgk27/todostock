@@ -1,0 +1,74 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  
+  <div class="md:col-span-2">
+    <app-custom-input 
+      [(value)]="name" 
+      label="Nombre del Producto" 
+      placeholder="Ej: aut maxime ea" 
+      icon="pi pi-box">
+    </app-custom-input>
+  </div>
+
+  <app-custom-input 
+    [(value)]="sku" 
+    label="Código SKU" 
+    placeholder="PROD-0000-XXXX" 
+    icon="pi pi-barcode">
+  </app-custom-input>
+
+  <app-custom-input 
+    [(value)]="taxPercentage" 
+    label="IVA (%)" 
+    type="number" 
+    icon="pi pi-percentage">
+  </app-custom-input>
+
+  <app-custom-input 
+    [(value)]="price" 
+    label="Precio de Venta" 
+    type="number" 
+    icon="pi pi-dollar">
+  </app-custom-input>
+
+  <app-custom-input 
+    [(value)]="stock" 
+    label="Stock Disponible" 
+    type="number" 
+    icon="pi pi-database">
+  </app-custom-input>
+
+  <div class="md:col-span-2">
+    <label class="label">
+      <span class="label-text font-bold text-base-content/70 text-sm">Descripción</span>
+    </label>
+    <textarea 
+      class="textarea textarea-bordered w-full bg-base-200 focus:textarea-primary min-h-[80px] text-base-content text-sm"
+      [(ngModel)]="description"
+      placeholder="Escribe los detalles o especificaciones de este artículo...">
+    </textarea>
+  </div>
+
+  @if (existingImages().length > 0) {
+    <div class="md:col-span-2 mt-2">
+      <label class="label pt-0">
+        <span class="label-text font-bold text-base-content/70 text-sm">Imágenes Guardadas ({{ existingImages().length }})</span>
+      </label>
+      
+      <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 bg-base-200 p-3 rounded-xl border border-base-300">
+        @for (img of existingImages(); track img.id) {
+          <div class="relative group aspect-square bg-base-100 rounded-lg overflow-hidden border border-base-300 shadow-sm">
+            <img 
+              [src]="'http://172.20.0.1:37238/storage/' + img.file_path" 
+              alt="Miniatura de producto" 
+              class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
+            
+            <span class="absolute top-1 left-1 bg-black/70 text-[10px] text-white px-1.5 py-0.5 rounded font-mono">
+              #{{ img.id }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>

@@ -2,45 +2,77 @@
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
     <div>
       <h1 class="text-2xl font-black tracking-tight">Catálogo de Productos</h1>
-      <p class="text-sm text-base-content/60">Administra el inventario centralizado de TodoStock.</p>
+      <p class="text-sm text-base-content/60">
+        Administra el inventario centralizado de TodoStock.
+      </p>
     </div>
-    <button class="btn btn-primary text-white gap-2 shadow">
+    <button (click)="onNewProduct()" class="btn btn-primary text-white gap-2 shadow">
       <i class="pi pi-plus"></i>
       Nuevo Producto
     </button>
   </div>
 
   <div class="bg-base-100 p-4 rounded-xl shadow-sm border border-base-300">
-    <app-custom-input 
+    <app-custom-input
       [value]="productsFacade.searchQuery()"
       (valueChange)="onSearchChange($event)"
       placeholder="Buscar por nombre o SKU..."
       type="text"
-      icon="pi-search">
+      icon="pi-search"
+    >
     </app-custom-input>
   </div>
 
   @if (productsFacade.isLoading()) {
-    <div class="bg-base-100 rounded-xl shadow-sm border border-base-300 flex flex-col justify-center items-center py-20 gap-3">
+    <div
+      class="bg-base-100 rounded-xl shadow-sm border border-base-300 flex flex-col justify-center items-center py-20 gap-3"
+    >
       <span class="loading loading-spinner loading-lg text-primary"></span>
       <span class="text-sm text-base-content/60 font-medium">Sincronizando con PostgreSQL...</span>
     </div>
   } @else {
     <div class="space-y-4">
-      
-      <app-data-table 
+      <app-data-table
         [columns]="productColumns"
         [data]="productsFacade.products()"
         (onEdit)="onEditProduct($event)"
-        (onDelete)="onDeleteProduct($event)">
+        (onDelete)="onDeleteProduct($event)"
+      >
       </app-data-table>
 
       <app-single-pagination
         [currentPage]="productsFacade.pagination().currentPage"
         [lastPage]="productsFacade.pagination().lastPage"
-        (onPageChange)="onPageChange($event)">
+        (onPageChange)="onPageChange($event)"
+      >
       </app-single-pagination>
-
     </div>
   }
 </div>
+
+<app-custom-modal
+  [(isOpen)]="isModalOpen"
+  [title]="modalTitle()"
+  (onClose)="onCloseModal()"
+>
+  @if (productsFacade.isLoading() && isEditing()) {
+    <div class="flex flex-col justify-center items-center py-12 gap-2">
+      <span class="loading loading-spinner loading-md text-primary"></span>
+      <p class="text-xs text-base-content/60 font-medium">Obteniendo ficha técnica...</p>
+    </div>
+  } @else {
+    <app-product-form></app-product-form>
+  }
+
+  <div class="flex justify-end gap-2 pt-6 border-t border-base-300 mt-6">
+    <button (click)="onCloseModal()" class="btn btn-ghost btn-sm">Cancelar</button>
+    <button
+      [disabled]="productsFacade.isLoading()"
+      (click)="handleSave()"
+      class="btn btn-primary btn-sm text-white px-6"
+    >
+      <i class="pi pi-save mr-2"></i>
+      Guardar Producto
+    </button>
+  </div>
+</app-custom-modal>
