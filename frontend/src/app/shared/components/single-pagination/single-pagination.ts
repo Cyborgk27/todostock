@@ -12,9 +12,13 @@ export class SinglePagination {
 
   onPageChange = output<number>();
 
-  // Selectores computados reactivos
   isFirstPage = computed(() => this.currentPage() === 1);
   isLastPage = computed(() => this.currentPage() === this.lastPage());
+
+  pagesArray = computed(() => {
+    const total = this.lastPage();
+    return Array.from({ length: total }, (_, i) => i + 1);
+  });
 
   changePage(page: number): void {
     if (page >= 1 && page <= this.lastPage()) {

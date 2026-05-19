@@ -6,6 +6,13 @@ export interface TableColumn {
   format?: 'text' | 'date' | 'currency';
 }
 
+export interface TableAction {
+  id: string;          // Identificador único de la acción (ej: 'view-details', 'download-pdf')
+  icon: string;        // Clase de PrimeIcons (ej: 'pi pi-eye', 'pi pi-download')
+  tooltip?: string;    // Texto de ayuda opcional
+  colorClass?: string; // Color personalizado de DaisyUI (ej: 'text-warning', 'text-success')
+}
+
 @Component({
   selector: 'app-data-table',
   standalone: false,
@@ -15,8 +22,10 @@ export interface TableColumn {
 export class DataTable {
   columns = input.required<TableColumn[]>();
   data = input.required<any[]>();
+  actions = input<TableAction[]>([]);
 
   // Outputs para acciones transaccionales
   onEdit = output<any>();
   onDelete = output<number>();
+  onActionClick = output<{ actionId: string; row: any }>();
 }

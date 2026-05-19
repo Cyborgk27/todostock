@@ -6,6 +6,17 @@ const routes: Routes = [
   {
     path: '',
     component: DashboardLayout,
+    children: [
+      {
+        path: '',
+        redirectTo: 'catalog', // Redirige por defecto al catálogo al entrar a /dashboard
+        pathMatch: 'full'
+      },
+      {
+        path: 'catalog',
+        loadChildren: () => import('../products/products-module').then(m => m.ProductsModule)
+      }
+    ]
   }
 ];
 
