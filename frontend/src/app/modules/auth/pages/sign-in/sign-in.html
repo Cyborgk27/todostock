@@ -1,15 +1,16 @@
-<div class="min-h-screen flex items-center justify-center bg-base-200 px-4">
-  <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-300">
-    <div class="card-body">
+<div class="min-h-screen flex items-center justify-center bg-base-200 px-4 py-8">
+  <div class="card w-full max-w-4xl bg-base-100 shadow-2xl border border-base-300 grid grid-cols-1 md:grid-cols-2 overflow-hidden min-h-[550px]">
+    
+    <div class="card-body justify-center p-8 sm:p-12 order-2 md:order-1">
       
-      <div class="text-center mb-4">
+      <div class="text-center md:text-left mb-6">
         <h1 class="text-3xl font-bold text-primary">TodoStock</h1>
         <p class="text-sm text-base-content/60 mt-1">Ingresa tus credenciales de acceso</p>
       </div>
 
       @if (authFacade.errorMessage()) {
-        <div class="alert alert-error shadow-sm py-3 mb-2 rounded-md animate-fade-in">
-          <i class="bi bi-exclamation-triangle-fill text-lg"></i>
+        <div class="alert alert-error shadow-sm py-3 mb-4 rounded-md animate-fade-in">
+          <i class="pi pi-exclamation-triangle text-lg"></i>
           <span class="text-sm font-medium">{{ authFacade.errorMessage() }}</span>
         </div>
       }
@@ -20,7 +21,7 @@
           label="Correo Electrónico"
           type="email"
           placeholder="admin@todotek.com"
-          icon="pi pi-envelope"
+          icon="pi-envelope"
           [required]="true"
           [(value)]="email">
         </app-custom-input>
@@ -29,7 +30,7 @@
           label="Contraseña"
           type="password"
           placeholder="••••••••"
-          icon="pi pi-lock"
+          icon="pi-lock"
           [required]="true"
           [(value)]="password">
         </app-custom-input>
@@ -50,5 +51,23 @@
 
       </form>
     </div>
+
+    <div class="hidden md:flex flex-col items-center justify-center bg-primary/5 p-8 border-l border-base-300 order-1 md:order-2 relative select-none">
+      <div class="absolute inset-0 opacity-5 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]"></div>
+      
+      <svg class="w-full max-w-[280px] h-auto text-primary relative z-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" class="text-primary/20" fill="currentColor"/>
+        <polyline points="9 22 9 12 15 12 15 22" />
+        <rect x="6" y="6" width="4" height="4" rx="0.5" stroke-width="1.5"/>
+        <rect x="14" y="6" width="4" height="4" rx="0.5" stroke-width="1.5"/>
+        <path d="M2 9h20" stroke-width="1.5"/>
+      </svg>
+
+      <div class="text-center mt-6 max-w-xs relative z-10">
+        <h3 class="text-lg font-bold text-base-content">Control Total de Inventario</h3>
+        <p class="text-xs text-base-content/60 mt-2">Gestiona el stock, ventas y catálogos de tu negocio en tiempo real desde un solo lugar.</p>
+      </div>
+    </div>
+
   </div>
 </div>

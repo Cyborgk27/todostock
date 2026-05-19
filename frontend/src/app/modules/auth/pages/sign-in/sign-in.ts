@@ -21,6 +21,6 @@ export class SignIn {
     this.authFacade.login({
       email: this.email(),
       password: this.password()
-    });
+    }).subscribe();
   }
 }
