@@ -10,6 +10,6 @@ import { CustomModal } from './components/custom-modal/custom-modal';
 @NgModule({
   declarations: [DataFilter, DataTable, SinglePagination, CustomInput, CustomModal],
   imports: [CommonModule, CurrencyPipe, DatePipe, FormsModule],
-  exports: [DataFilter, DataTable, SinglePagination, CustomInput],
+  exports: [DataFilter, DataTable, SinglePagination, CustomInput, CustomModal],
 })
 export class SharedModule {}
