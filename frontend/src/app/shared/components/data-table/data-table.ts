@@ -24,8 +24,16 @@ export class DataTable {
   data = input.required<any[]>();
   actions = input<TableAction[]>([]);
 
+  showEdit = input<boolean>(true);
+  showDelete = input<boolean>(true);
+
   // Outputs para acciones transaccionales
   onEdit = output<any>();
   onDelete = output<number>();
   onActionClick = output<{ actionId: string; row: any }>();
+
+  public getCellValue(row: any, key: string): any {
+    if (!key) return '';
+    return key.split('.').reduce((obj, segment) => obj?.[segment], row);
+  }
 }

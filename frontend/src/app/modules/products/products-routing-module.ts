@@ -4,12 +4,12 @@ import { ProductList } from './pages/product-list/product-list';
 
 const routes: Routes = [
   {
-    path: 'products',
+    path: '',
     component: ProductList,
   },
   {
     path: '**',
-    redirectTo: 'products',
+    redirectTo: '',
   }
 ];
 

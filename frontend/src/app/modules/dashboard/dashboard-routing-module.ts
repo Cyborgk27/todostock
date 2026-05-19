@@ -9,13 +9,17 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'catalog', // Redirige por defecto al catálogo al entrar a /dashboard
+        redirectTo: 'products', // Redirige por defecto al catálogo al entrar a /dashboard
         pathMatch: 'full'
       },
       {
-        path: 'catalog',
+        path: 'products',
         loadChildren: () => import('../products/products-module').then(m => m.ProductsModule)
-      }
+      },
+      {
+        path: 'invoices',
+        loadChildren: () => import('../invoices/invoices-module').then(m => m.InvoicesModule)
+      },
     ]
   }
 ];
@@ -24,4 +28,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class DashboardRoutingModule {}
+export class DashboardRoutingModule { }

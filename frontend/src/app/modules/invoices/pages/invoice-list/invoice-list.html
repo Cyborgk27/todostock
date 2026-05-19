@@ -1,0 +1,88 @@
+<div class="space-y-6 p-6">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-black tracking-tight">Registro de Facturación</h1>
+      <p class="text-sm text-base-content/60">
+        Administra las ventas transaccionales y decrementos de inventario de TodoStock.
+      </p>
+    </div>
+    <button (click)="onNewInvoice()" class="btn btn-primary text-white gap-2 shadow">
+      <i class="pi pi-plus"></i>
+      Nueva Venta
+    </button>
+  </div>
+
+  <div class="bg-base-100 p-4 rounded-xl shadow-sm border border-base-300">
+    <app-custom-input
+      [value]="invoiceFacade.searchQuery()"
+      (valueChange)="onSearchChange($event)"
+      placeholder="Buscar por número de factura, cliente o cédula/RUC..."
+      type="text"
+      icon="pi-search"
+    >
+    </app-custom-input>
+  </div>
+
+  @if (invoiceFacade.isLoading() && !isModalOpen()) {
+    <div
+      class="bg-base-100 rounded-xl shadow-sm border border-base-300 flex flex-col justify-center items-center py-20 gap-3"
+    >
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+      <span class="text-sm text-base-content/60 font-medium">Sincronizando con PostgreSQL...</span>
+    </div>
+  } @else {
+    <div class="space-y-4">
+      <app-data-table
+        [columns]="invoiceColumns"
+        [data]="invoiceFacade.invoices()"
+        [showEdit]="true"
+        [showDelete]="false"
+        (onEdit)="onViewInvoice($event)"
+      >
+      </app-data-table>
+
+      <app-single-pagination
+        [currentPage]="invoiceFacade.currentPage()"
+        [lastPage]="invoiceFacade.lastPage()"
+        (onPageChange)="onPageChange($event)"
+      >
+      </app-single-pagination>
+    </div>
+  }
+</div>
+
+<!-- <app-custom-modal
+  [(isOpen)]="isModalOpen"
+  [title]="modalTitle()"
+  (onClose)="onCloseModal()"
+>
+  @if (invoiceFacade.isLoading() && isViewingDetail()) {
+    <div class="flex flex-col justify-center items-center py-12 gap-2">
+      <span class="loading loading-spinner loading-md text-primary"></span>
+      <p class="text-xs text-base-content/60 font-medium">Obteniendo registro fiscal...</p>
+    </div>
+  } @else {
+    <app-invoice-form [readOnly]="isViewingDetail()"></app-invoice-form>
+  }
+
+  <div class="flex justify-end gap-2 pt-6 border-t border-base-300 mt-6">
+    <button (click)="onCloseModal()" class="btn btn-ghost btn-sm">
+      {{ isViewingDetail() ? 'Cerrar' : 'Cancelar' }}
+    </button>
+    
+    @if (!isViewingDetail()) {
+      <button
+        [disabled]="invoiceFacade.isSaving()"
+        (click)="handleSave()"
+        class="btn btn-primary btn-sm text-white px-6"
+      >
+        @if (invoiceFacade.isSaving()) {
+          <span class="loading loading-spinner loading-xs mr-2"></span>
+        } @else {
+          <i class="pi pi-save mr-2"></i>
+        }
+        Emitir Factura
+      </button>
+    }
+  </div>
+</app-custom-modal> -->

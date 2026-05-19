@@ -58,14 +58,13 @@ export class ProductosFacade {
         this._isLoading.set(false);
       },
       error: () => {
-        // Tu errorInterceptor ya muestra la alerta visual de SweetAlert2, solo apagamos el loading
         this._isLoading.set(false);
       }
     });
   }
 
   /**
-   * 📝 Obtiene la ficha detallada de un producto por ID (para editar o ver detalles)
+   * Obtiene la ficha detallada de un producto por ID (para editar o ver detalles)
    */
   loadProductById(id: number): void {
     this._isLoading.set(true);

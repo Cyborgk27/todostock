@@ -5,54 +5,63 @@
         @for (col of columns(); track col.key) {
           <th class="font-bold text-sm">{{ col.label }}</th>
         }
-        <th class="text-right pr-6 font-bold text-sm">Acciones</th>
+        @if (actions().length > 0 || showEdit() || showDelete()) {
+          <th class="text-right pr-6 font-bold text-sm">Acciones</th>
+        }
       </tr>
     </thead>
-    
+
     <tbody class="divide-y divide-base-300">
       @for (row of data(); track row.id) {
         <tr class="hover:bg-base-200/30 transition-colors">
           @for (col of columns(); track col.key) {
             <td class="whitespace-nowrap text-sm text-base-content/80 font-medium">
               @if (col.format === 'currency') {
-                {{ row[col.key] | currency }}
+                {{ getCellValue(row, col.key) | currency }}
               } @else if (col.format === 'date') {
-                {{ row[col.key] | date: 'dd/MM/yyyy HH:mm' }}
+                {{ getCellValue(row, col.key) | date: 'dd/MM/yyyy HH:mm' }}
               } @else {
-                {{ row[col.key] }}
+                {{ getCellValue(row, col.key) }}
               }
             </td>
           }
-          
-          <td class="whitespace-nowrap text-right pr-4">
-            <div class="inline-flex items-center gap-1">
-              
-              @for (action of actions(); track action.id) {
-                <button 
-                  (click)="onActionClick.emit({ actionId: action.id, row: row })" 
-                  class="btn btn-ghost btn-xs shadow-none tooltip"
-                  [attr.data-tip]="action.tooltip"
-                  [ngClass]="action.colorClass || 'text-base-content/70'">
-                  <i [class]="'pi ' + action.icon + ' text-sm'"></i>
-                </button>
-              }
 
-              <button 
-                (click)="onEdit.emit(row)" 
-                class="btn btn-ghost btn-xs text-info hover:bg-info/10 tooltip gap-1"
-                data-tip="Editar">
-                <i class="pi pi-pencil text-xs"></i>
-              </button>
+          @if (actions().length > 0 || showEdit() || showDelete()) {
+            <td class="whitespace-nowrap text-right pr-4">
+              <div class="inline-flex items-center gap-1">
+                @for (action of actions(); track action.id) {
+                  <button
+                    (click)="onActionClick.emit({ actionId: action.id, row: row })"
+                    class="btn btn-ghost btn-xs shadow-none tooltip"
+                    [attr.data-tip]="action.tooltip"
+                    [ngClass]="action.colorClass || 'text-base-content/70'"
+                  >
+                    <i [class]="'pi ' + action.icon + ' text-sm'"></i>
+                  </button>
+                }
 
-              <button 
-                (click)="onDelete.emit(row.id)" 
-                class="btn btn-ghost btn-xs text-error hover:bg-error/10 tooltip gap-1"
-                data-tip="Eliminar">
-                <i class="pi pi-trash text-xs"></i>
-              </button>
+                @if (showEdit()) {
+                  <button
+                    (click)="onEdit.emit(row)"
+                    class="btn btn-ghost btn-xs text-info hover:bg-info/10 tooltip gap-1"
+                    data-tip="Editar"
+                  >
+                    <i class="pi pi-pencil text-xs"></i>
+                  </button>
+                }
 
-            </div>
-          </td>
+                @if (showDelete()) {
+                  <button
+                    (click)="onDelete.emit(row.id)"
+                    class="btn btn-ghost btn-xs text-error hover:bg-error/10 tooltip gap-1"
+                    data-tip="Eliminar"
+                  >
+                    <i class="pi pi-trash text-xs"></i>
+                  </button>
+                }
+              </div>
+            </td>
+          }
         </tr>
       }
     </tbody>

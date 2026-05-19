@@ -16,7 +16,7 @@ export class InvoiceFacade {
   private _selectedInvoice = signal<ShowInvoice200Response | null>(null);
   private _isLoading = signal<boolean>(false);
   private _isSaving = signal<boolean>(false);
-  private _searchTerm = signal<string>('');
+  private _searchQuery = signal<string>('');
   private _currentPage = signal<number>(1);
 
   // ─── COMPUTED READONLY SIGNALS FOR COMPONENTS ──────────────────────
@@ -24,7 +24,7 @@ export class InvoiceFacade {
   public selectedInvoice = computed(() => this._selectedInvoice());
   public isLoading = computed(() => this._isLoading());
   public isSaving = computed(() => this._isSaving());
-  public searchTerm = computed(() => this._searchTerm());
+  public searchQuery = computed(() => this._searchQuery());
 
   public currentPage = computed(() => this._invoicesResponse()?.current_page ?? 1);
   public totalItems = computed(() => this._invoicesResponse()?.total ?? 0);
@@ -41,17 +41,21 @@ export class InvoiceFacade {
   /**
    * Carga el listado de facturas aplicando los filtros reactivos actuales
    */
-  public loadInvoices(): void {
+  public loadInvoices(search?: string, page?: number): void {
     this._isLoading.set(true);
 
-    const search = this._searchTerm() ? this._searchTerm() : undefined;
-    const page = this._currentPage();
+    if (search !== undefined) this._searchQuery.set(search);
+    if (page !== undefined) this._currentPage.set(page);
 
-    this._invoiceService.getInvoicesList(search, page)
+    this._invoiceService.getInvoicesList(
+      this._searchQuery(), 
+      this._currentPage()
+    )
       .pipe(finalize(() => this._isLoading.set(false)))
       .subscribe({
         next: (response) => {
           this._invoicesResponse.set(response);
+          this._isLoading.set(false);
         },
         error: (err) => {
           console.error('Error al cargar listado de facturas:', err);
@@ -61,12 +65,10 @@ export class InvoiceFacade {
   }
 
   /**
-   * Cambia el término de búsqueda y resetea a la página 1
+   * Método auxiliar para refrescar la vista actual manteniendo la página y búsqueda activa
    */
-  public search(term: string): void {
-    this._searchTerm.set(term);
-    this._currentPage.set(1);
-    this.loadInvoices();
+  private refresh(): void {
+    this.loadInvoices(this._searchQuery(), this._currentPage());
   }
 
   /**
