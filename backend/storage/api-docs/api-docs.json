@@ -1,0 +1,1493 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Todostock API",
+        "description": "Documentación oficial de los endpoints de la API de Todostock para Todotek S.A. Incluye autenticación por Sanctum, gestión de inventarios y facturación transaccional.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost/api",
+            "description": "Servidor Local de Desarrollo (Docker Sail)"
+        }
+    ],
+    "paths": {
+        "/login": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Iniciar sesión de usuario",
+                "description": "Autentica las credenciales del usuario y genera un token Bearer válido para consumir los endpoints de Todostock.",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@todotek.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Autenticación exitosa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|7zK9gR..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Admin Todotek"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "admin@todotek.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "412": {
+                        "description": "Precondición fallida (Credenciales incorrectas)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Las credenciales proporcionadas son incorrectas."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Cerrar sesión de usuario",
+                "description": "Revoca y elimina el token de acceso actual del usuario autenticado para invalidar la sesión.",
+                "operationId": "authLogout",
+                "responses": {
+                    "200": {
+                        "description": "Sesión cerrada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sesión cerrada correctamente."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado (Token inválido o ausente)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/clients": {
+            "get": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Obtener listado de clientes paginado",
+                "description": "Retorna una lista pagipada de los clientes registrados. Permite buscar de forma dinámica por nombre, identificación o email utilizando el parámetro 'search'.",
+                "operationId": "getClientsList",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Término de búsqueda para filtrar clientes (nombre, identificación, email)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página para la paginación del servidor",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de clientes obtenido exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "identification": {
+                                                        "type": "string",
+                                                        "example": "0987654321"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Juan Pérez"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "juan.perez@example.com"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string",
+                                                        "example": "0999999999"
+                                                    },
+                                                    "address": {
+                                                        "type": "string",
+                                                        "example": "Av. Principal y Calle 2"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-05-19T00:00:00.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-05-19T00:00:00.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/clients?page=1"
+                                        },
+                                        "from": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "last_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/clients?page=3"
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/clients?page=2"
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/clients"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "example": null
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 30
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado (Token inválido o ausente)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Registrar un nuevo cliente",
+                "description": "Crea un registro de cliente en el sistema. Valida campos únicos como identificación y correo electrónico.",
+                "operationId": "storeClient",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identification",
+                                    "name",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "identification": {
+                                        "type": "string",
+                                        "example": "0955555555"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Carlos Mendoza"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "carlos.mendoza@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0988888888"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Cdla. El Recreo, Durán"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Cliente creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 31
+                                        },
+                                        "identification": {
+                                            "type": "string",
+                                            "example": "0955555555"
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Carlos Mendoza"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "carlos.mendoza@example.com"
+                                        },
+                                        "phone": {
+                                            "type": "string",
+                                            "example": "0988888888"
+                                        },
+                                        "address": {
+                                            "type": "string",
+                                            "example": "Cdla. El Recreo, Durán"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-05-19T00:00:00.000000Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-05-19T00:00:00.000000Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación (Campos inválidos o duplicados)"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/clients/{id}": {
+            "get": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Obtener el detalle de un cliente específico",
+                "description": "Busca y retorna la información completa de un cliente por su ID.",
+                "operationId": "showClient",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID único del cliente",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ficha del cliente obtenida correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "identification": {
+                                            "type": "string",
+                                            "example": "0987654321"
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Juan Pérez"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "juan.perez@example.com"
+                                        },
+                                        "phone": {
+                                            "type": "string",
+                                            "example": "0999999999"
+                                        },
+                                        "address": {
+                                            "type": "string",
+                                            "example": "Av. Principal y Calle 2"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-05-19T00:00:00.000000Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-05-19T00:00:00.000000Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cliente no encontrado"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Actualizar datos de un cliente",
+                "description": "Modifica la información de un cliente existente de acuerdo a su ID. Valida excepciones unique si el correo o cédula pertenecen al mismo registro.",
+                "operationId": "updateClient",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del cliente a modificar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identification",
+                                    "name",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "identification": {
+                                        "type": "string",
+                                        "example": "0987654321"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Juan Carlos Pérez"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "juan.carlos@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0911111111"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Urdesa Central, Guayaquil"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cliente actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "identification": {
+                                            "type": "string",
+                                            "example": "0987654321"
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Juan Carlos Pérez"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "juan.carlos@example.com"
+                                        },
+                                        "phone": {
+                                            "type": "string",
+                                            "example": "0911111111"
+                                        },
+                                        "address": {
+                                            "type": "string",
+                                            "example": "Urdesa Central, Guayaquil"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-05-19T00:00:00.000000Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-05-19T00:00:00.000000Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación de datos"
+                    },
+                    "404": {
+                        "description": "Cliente no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Eliminar un cliente (Soft Delete)",
+                "description": "Realiza el borrado lógico de un cliente en la base de datos para no afectar la integridad histórica de facturas pasadas.",
+                "operationId": "destroyClient",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del cliente a eliminar lógicamente",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cliente eliminado lógicamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cliente eliminado lógicamente."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cliente no encontrado"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/invoices": {
+            "get": {
+                "tags": [
+                    "Facturación"
+                ],
+                "summary": "Obtener listado de facturas paginado",
+                "description": "Retorna una lista paginada de las facturas emitidas con la información básica del cliente. Permite buscar por número de factura, nombre o identificación del cliente.",
+                "operationId": "getInvoicesList",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Término de búsqueda (número de factura, nombre o identificación del cliente)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página para la paginación del servidor",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de facturas obtenido exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "client_id": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "invoice_number": {
+                                                        "type": "string",
+                                                        "example": "FAC-000001"
+                                                    },
+                                                    "subtotal": {
+                                                        "type": "string",
+                                                        "example": "150.00"
+                                                    },
+                                                    "tax_total": {
+                                                        "type": "string",
+                                                        "example": "22.50"
+                                                    },
+                                                    "total": {
+                                                        "type": "string",
+                                                        "example": "172.50"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-05-19T00:00:00.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-05-19T00:00:00.000000Z"
+                                                    },
+                                                    "client": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Kevin Cepeda"
+                                                            },
+                                                            "identification": {
+                                                                "type": "string",
+                                                                "example": "0955555555"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 15
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Facturación"
+                ],
+                "summary": "Crear una nueva factura (Venta transaccional)",
+                "description": "Procesa la venta de productos bajo una transacción de base de datos. Valida la disponibilidad de stock, calcula subtotales e impuestos en tiempo real y decrementa el inventario de forma automática.",
+                "operationId": "storeInvoice",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "client_id",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "client_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "items": {
+                                        "description": "Listado de productos y cantidades a facturar",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "product_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Factura procesada y stock actualizado con éxito",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Factura procesada y stock actualizado con éxito."
+                                        },
+                                        "invoice": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 16
+                                                },
+                                                "client_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "invoice_number": {
+                                                    "type": "string",
+                                                    "example": "FAC-000016"
+                                                },
+                                                "subtotal": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 500
+                                                },
+                                                "tax_total": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 75
+                                                },
+                                                "total": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 575
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2026-05-19T00:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2026-05-19T00:00:00.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de negocio o validación (Ej: Stock insuficiente para el producto)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Stock insuficiente para el producto: Producto Ejemplo. Disponibles: 1"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/invoices/{id}": {
+            "get": {
+                "tags": [
+                    "Facturación"
+                ],
+                "summary": "Obtener el detalle completo de una factura",
+                "description": "Retorna la cabecera de la factura, la ficha del cliente y todas las líneas de detalle con la información del producto asociado.",
+                "operationId": "showInvoice",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID único de la factura",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle de la factura obtenido exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "invoice_number": {
+                                            "type": "string",
+                                            "example": "FAC-000001"
+                                        },
+                                        "subtotal": {
+                                            "type": "string",
+                                            "example": "100.00"
+                                        },
+                                        "tax_total": {
+                                            "type": "string",
+                                            "example": "15.00"
+                                        },
+                                        "total": {
+                                            "type": "string",
+                                            "example": "115.00"
+                                        },
+                                        "client": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Juan Pérez"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "quantity": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "price": {
+                                                        "type": "string",
+                                                        "example": "50.00"
+                                                    },
+                                                    "tax_amount": {
+                                                        "type": "string",
+                                                        "example": "15.00"
+                                                    },
+                                                    "total": {
+                                                        "type": "string",
+                                                        "example": "115.00"
+                                                    },
+                                                    "product": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Teclado Mecánico"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Factura no encontrada"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/products": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Obtener listado de productos con imágenes",
+                "description": "Retorna una lista paginada de los productos con sus respectivas imágenes asociadas. Permite buscar de forma dinámica por nombre o SKU.",
+                "operationId": "getProductsList",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Término de búsqueda para filtrar por nombre o SKU",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página para la paginación del servidor",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de productos obtenido exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Teclado Mecánico RGB"
+                                                    },
+                                                    "sku": {
+                                                        "type": "string",
+                                                        "example": "TEC-MECH-01"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Teclado con switches mecánicos y retroiluminación."
+                                                    },
+                                                    "stock": {
+                                                        "type": "integer",
+                                                        "example": 25
+                                                    },
+                                                    "price": {
+                                                        "type": "string",
+                                                        "example": "45.00"
+                                                    },
+                                                    "tax_percentage": {
+                                                        "type": "string",
+                                                        "example": "15.00"
+                                                    },
+                                                    "images": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "product_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "file_path": {
+                                                                    "type": "string",
+                                                                    "example": "/storage/products/abc123image.png"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 50
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Registrar un nuevo producto con imágenes opcionales",
+                "description": "Crea un producto en el catálogo. Al manejar subida de archivos físicos, requiere que la petición sea de tipo multipart/form-data.",
+                "operationId": "storeProduct",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "sku",
+                                    "stock",
+                                    "price",
+                                    "tax_percentage"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Mouse Gamer Óptico"
+                                    },
+                                    "sku": {
+                                        "type": "string",
+                                        "example": "MOU-GAME-02"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Mouse ergonómico con sensor de 16000 DPI."
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 15
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 29.99
+                                    },
+                                    "tax_percentage": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 15
+                                    },
+                                    "images[]": {
+                                        "description": "Arreglo de imágenes físicas a subir (jpeg, png, webp. Máx 2MB por archivo)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Producto creado exitosamente con sus imágenes vinculadas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 6
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Mouse Gamer Óptico"
+                                        },
+                                        "sku": {
+                                            "type": "string",
+                                            "example": "MOU-GAME-02"
+                                        },
+                                        "stock": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "price": {
+                                            "type": "number",
+                                            "example": 29.99
+                                        },
+                                        "tax_percentage": {
+                                            "type": "number",
+                                            "example": 15
+                                        },
+                                        "images": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación (Ej: SKU ya registrado o formato de imagen no soportado)"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/products/{id}": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Obtener la ficha detallada de un producto",
+                "description": "Retorna la información de un producto específico junto con su galería de imágenes a través de su ID.",
+                "operationId": "showProduct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID único del producto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del producto cargado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Teclado Mecánico RGB"
+                                        },
+                                        "sku": {
+                                            "type": "string",
+                                            "example": "TEC-MECH-01"
+                                        },
+                                        "stock": {
+                                            "type": "integer",
+                                            "example": 25
+                                        },
+                                        "price": {
+                                            "type": "string",
+                                            "example": "45.00"
+                                        },
+                                        "images": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Actualizar datos y añadir imágenes a un producto",
+                "description": "Modifica un producto existente. Nota: Debido a limitaciones nativas de PHP para leer peticiones 'multipart/form-data' usando el método PUT, se recomienda consumir este endpoint mediante POST simulando el multipart.",
+                "operationId": "updateProduct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del producto a modificar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "sku",
+                                    "stock",
+                                    "price",
+                                    "tax_percentage"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Teclado Mecánico RGB Pro"
+                                    },
+                                    "sku": {
+                                        "type": "string",
+                                        "example": "TEC-MECH-01"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Edición pro con switches customizados."
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 20
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 49.99
+                                    },
+                                    "tax_percentage": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 15
+                                    },
+                                    "images[]": {
+                                        "description": "Nuevas imágenes físicas para agregar a la galería del producto",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Producto actualizado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Teclado Mecánico RGB Pro"
+                                        },
+                                        "sku": {
+                                            "type": "string",
+                                            "example": "TEC-MECH-01"
+                                        },
+                                        "images": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Eliminar un producto (Soft Delete)",
+                "description": "Aplica un borrado lógico al producto. El producto dejará de aparecer en los catálogos activos pero se conservará en la BD para consistencia del histórico de detalles de facturas.",
+                "operationId": "destroyProduct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del producto a eliminar lógicamente",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Producto eliminado lógicamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Producto eliminado lógicamente."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Introduce el token 'access_token' recibido en el login con el formato: Bearer {token}",
+                "name": "Authorization",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Autenticación",
+            "description": "Autenticación"
+        },
+        {
+            "name": "Clientes",
+            "description": "Clientes"
+        },
+        {
+            "name": "Facturación",
+            "description": "Facturación"
+        },
+        {
+            "name": "Productos",
+            "description": "Productos"
+        }
+    ]
+}
