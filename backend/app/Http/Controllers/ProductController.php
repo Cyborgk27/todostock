@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
-use App\Models\Product;
-use App\Models\ProductImage;
+use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use OpenApi\Attributes as OA;
 
 class ProductController extends Controller
 {
+
+    public function __construct(
+        protected ProductService $productService
+    ) {}
+
     #[OA\Get(
         path: "/products",
         summary: "Obtener listado de productos con imágenes",
@@ -91,16 +94,7 @@ class ProductController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $search = $request->query('search');
-
-        $products = Product::with('images')
-            ->when($search, function ($query, $search) {
-                $query->where('name', 'ilike', "%{$search}%")
-                      ->orWhere('sku', 'ilike', "%{$search}%");
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(10);
-
+        $products = $this->productService->listProducts($request->query('search'));
         return response()->json($products, 200);
     }
 
@@ -168,25 +162,12 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request): JsonResponse
     {
-        $validatedData = $request->validated();
-
-        // Extraer imágenes antes de la inserción masiva en tabla productos
+        $validated = $request->validated();
         $images = $request->file('images');
-        unset($validatedData['images']);
+        unset($validated['images']);
 
-        $product = Product::create($validatedData);
-
-        if ($request->hasFile('images')) {
-            foreach ($images as $image) {
-                $path = $image->store('products', 'public');
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'file_path' => Storage::url($path)
-                ]);
-            }
-        }
-
-        return response()->json($product->load('images'), 201);
+        $product = $this->productService->createProduct($validated, $images);
+        return response()->json($product, 201);
     }
 
     #[OA\Get(
@@ -234,14 +215,14 @@ class ProductController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $product = Product::with('images')->findOrFail($id);
+        $product = $this->productService->getProductById($id);
         return response()->json($product, 200);
     }
 
     #[OA\Post(
         path: "/products/{id}",
         summary: "Actualizar datos y añadir imágenes a un producto",
-        description: "Modifica un producto existente. Nota: Debido a limitaciones nativas de PHP para leer peticiones 'multipart/form-data' usando el método PUT, se recomienda consumir este endpoint mediante POST simulando el multipart.",
+        description: "Modifica un producto existente.",
         operationId: "updateProduct",
         tags: ["Productos"],
         security: [["bearerAuth" => []]],
@@ -305,25 +286,12 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, int $id): JsonResponse
     {
-        $product = Product::findOrFail($id);
-        $validatedData = $request->validated();
-
+        $validated = $request->validated();
         $images = $request->file('images');
-        unset($validatedData['images']);
+        unset($validated['images']);
 
-        $product->update($validatedData);
-
-        if ($request->hasFile('images')) {
-            foreach ($images as $image) {
-                $path = $image->store('products', 'public');
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'file_path' => Storage::url($path)
-                ]);
-            }
-        }
-
-        return response()->json($product->load('images'), 200);
+        $product = $this->productService->updateProduct($id, $validated, $images);
+        return response()->json($product, 200);
     }
 
     #[OA\Delete(
@@ -366,8 +334,7 @@ class ProductController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
-        $product = Product::findOrFail($id);
-        $product->delete(); // Soft Delete en cascada controlado por capa lógica
+        $this->productService->deleteProduct($id);
         return response()->json(['message' => 'Producto eliminado lógicamente.'], 200);
     }
 }

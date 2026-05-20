@@ -1307,7 +1307,7 @@
                     "Productos"
                 ],
                 "summary": "Actualizar datos y añadir imágenes a un producto",
-                "description": "Modifica un producto existente. Nota: Debido a limitaciones nativas de PHP para leer peticiones 'multipart/form-data' usando el método PUT, se recomienda consumir este endpoint mediante POST simulando el multipart.",
+                "description": "Modifica un producto existente.",
                 "operationId": "updateProduct",
                 "parameters": [
                     {
