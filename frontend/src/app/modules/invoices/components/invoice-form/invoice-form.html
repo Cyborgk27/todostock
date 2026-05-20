@@ -1,0 +1,98 @@
+<div class="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+  <div class="bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm space-y-4">
+    <div class="flex items-center gap-2 border-b border-base-300 pb-3">
+      <i class="pi pi-user text-primary text-lg"></i>
+      <h3 class="font-bold text-sm uppercase tracking-wider text-base-content/80">
+        Información del Cliente
+      </h3>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="label py-1"
+          ><span class="label-text font-semibold text-xs">Cédula / RUC</span></label
+        >
+        <app-custom-input
+          [value]="clientIdentification()"
+          (valueChange)="updateClientIdentification($event)"
+          [disabled]="readOnly()"
+          placeholder="Ej: 0999999999"
+          type="text"
+          icon="pi-id-card"
+        >
+        </app-custom-input>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="label py-1"
+          ><span class="label-text font-semibold text-xs">Nombres Completos</span></label
+        >
+        <app-custom-input
+          [value]="clientName()"
+          (valueChange)="updateClientName($event)"
+          [disabled]="readOnly()"
+          placeholder="Ej: Josh Ryan"
+          type="text"
+          icon="pi-user"
+        >
+        </app-custom-input>
+      </div>
+    </div>
+  </div>
+
+  @if (!readOnly()) {
+    <div class="bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm">
+      <label class="label py-1">
+        <span class="label-text font-bold text-xs text-primary uppercase tracking-wider"
+          >Añadir Productos a la Venta</span
+        >
+      </label>
+      <app-custom-input
+        [value]="productSearchQuery()"
+        (valueChange)="onSearchProductChange($event)"
+        placeholder="Escribe el nombre o el SKU del producto para indexar..."
+        type="text"
+        icon="pi-plus-circle"
+      >
+      </app-custom-input>
+    </div>
+  }
+
+  <div class="space-y-3">
+    <div class="flex items-center gap-2 border-b border-base-300 pb-2">
+      <i class="pi pi-shopping-cart text-primary text-lg"></i>
+      <h3 class="font-bold text-sm uppercase tracking-wider text-base-content/80">
+        Detalle de Artículos
+      </h3>
+    </div>
+
+    <app-data-table
+      [columns]="itemColumns"
+      [data]="invoiceItems()"
+      [showEdit]="false"
+      [showDelete]="!readOnly()"
+      (onDelete)="removeItem($event)"
+    >
+    </app-data-table>
+  </div>
+
+  <div class="flex justify-end">
+    <div
+      class="w-full md:w-72 bg-base-100 rounded-xl p-5 border border-base-300 shadow-sm space-y-3"
+    >
+      <div class="flex justify-between text-xs font-medium text-base-content/70">
+        <span>Subtotal:</span>
+        <span class="font-mono font-semibold">{{ subtotal() | currency }}</span>
+      </div>
+      <div class="flex justify-between text-xs font-medium text-base-content/70">
+        <span>IVA (15%):</span>
+        <span class="font-mono font-medium">{{ tax() | currency }}</span>
+      </div>
+      <div class="divider my-1"></div>
+      <div class="flex justify-between text-base font-black text-base-content">
+        <span>Total Facturado:</span>
+        <span class="font-mono text-primary font-bold">{{ total() | currency }}</span>
+      </div>
+    </div>
+  </div>
+</div>

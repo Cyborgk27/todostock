@@ -72,13 +72,12 @@ export class ProductForm {
   }
 
   public save(): void {
-    // Estructura limpia lista para enviar a la Fachada (aquí puedes adjuntar nuevos Blobs/Files si agregas un input file)
     const data = {
       name: this.name(),
       sku: this.sku(),
       stock: Number(this.stock()),
       price: Number(this.price()),
-      taxPercentage: Number(this.taxPercentage()), // Tu fachada lo mapeará a multipart/form-data
+      taxPercentage: Number(this.taxPercentage()),
       description: this.description(),
     };
 

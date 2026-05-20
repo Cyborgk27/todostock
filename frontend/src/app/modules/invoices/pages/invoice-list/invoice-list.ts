@@ -1,9 +1,9 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { InvoiceFacade } from '../../facade/invoice-facade';
-import { formatDate } from '@angular/common';
-import { TableColumn } from '../../../../shared/components/data-table/data-table';
+import { TableAction, TableColumn } from '../../../../shared/components/data-table/data-table';
+import { InvoiceForm } from '../../components/invoice-form/invoice-form';
 
 @Component({
   selector: 'app-invoice-list',
@@ -12,6 +12,8 @@ import { TableColumn } from '../../../../shared/components/data-table/data-table
 })
 export class InvoiceList implements OnInit {
   public invoiceFacade = inject(InvoiceFacade);
+
+  @ViewChild(InvoiceForm) invoiceForm?: InvoiceForm;
 
   // Control del modal
   public isModalOpen = signal<boolean>(false);
@@ -34,9 +36,19 @@ export class InvoiceList implements OnInit {
     { key: 'total', label: 'Total', format: 'currency' }
   ];
 
+  public actions: TableAction[] = [
+    { id: 'view-details', icon: 'pi pi-eye', tooltip: 'Ver Detalles', colorClass: 'text-info' }
+  ];
+
+  public onActionClick(event: { actionId: string; row: any }): void {
+    if (event.actionId === 'view-details') {
+      this.onViewInvoice(event.row);
+    }
+  }
+
   ngOnInit(): void {
-  
-      this.invoiceFacade.loadInvoices();
+
+    this.invoiceFacade.loadInvoices();
 
     // Pipe para el buscador reactivo
     this._searchSubject
@@ -77,6 +89,10 @@ export class InvoiceList implements OnInit {
   }
 
   public handleSave(): void {
-    // Aquí se disparará el método del formulario hijo cuando implementemos la persistencia
+    if (this.invoiceForm) {
+      this.invoiceForm.submitInvoice(() => {
+        this.isModalOpen.set(false);
+      });
+    }
   }
 }

@@ -13,7 +13,7 @@ export class InvoiceFacade {
 
   // ─── STATE SIGNALS ──────────────────────────────────────────────────
   private _invoicesResponse = signal<GetInvoicesList200Response | null>(null);
-  private _selectedInvoice = signal<ShowInvoice200Response | null>(null);
+  private _selectedInvoice = signal<any | null>(null);
   private _isLoading = signal<boolean>(false);
   private _isSaving = signal<boolean>(false);
   private _searchQuery = signal<string>('');

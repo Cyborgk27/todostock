@@ -22,6 +22,7 @@
       [(ngModel)]="value"
       class="input input-bordered w-full bg-base-100 focus:input-primary transition-all duration-200"
       [ngClass]="{ 'pl-12': icon() }"
+      [disabled]="disabled()"
     />
   </div>
 </div>

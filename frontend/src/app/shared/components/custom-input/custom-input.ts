@@ -14,4 +14,5 @@ export class CustomInput {
   placeholder = input<string>('');
   required = input<boolean>(false);
   icon = input<string>('');
+  disabled = input<boolean>(false);
 }

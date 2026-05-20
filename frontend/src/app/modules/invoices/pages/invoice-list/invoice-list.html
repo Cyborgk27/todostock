@@ -35,9 +35,10 @@
       <app-data-table
         [columns]="invoiceColumns"
         [data]="invoiceFacade.invoices()"
-        [showEdit]="true"
+        [showEdit]="false"
         [showDelete]="false"
-        (onEdit)="onViewInvoice($event)"
+        [actions]="actions"
+        (onActionClick)="onActionClick($event)"
       >
       </app-data-table>
 
@@ -51,15 +52,16 @@
   }
 </div>
 
-<!-- <app-custom-modal
-  [(isOpen)]="isModalOpen"
+<app-custom-modal
+  [isOpen]="isModalOpen()"
+  (isOpenChange)="isModalOpen.set($event)"
   [title]="modalTitle()"
   (onClose)="onCloseModal()"
 >
   @if (invoiceFacade.isLoading() && isViewingDetail()) {
     <div class="flex flex-col justify-center items-center py-12 gap-2">
       <span class="loading loading-spinner loading-md text-primary"></span>
-      <p class="text-xs text-base-content/60 font-medium">Obteniendo registro fiscal...</p>
+      <p class="text-xs text-base-content/60 font-medium">Obteniendo registro fiscal desde PostgreSQL...</p>
     </div>
   } @else {
     <app-invoice-form [readOnly]="isViewingDetail()"></app-invoice-form>
@@ -85,4 +87,4 @@
       </button>
     }
   </div>
-</app-custom-modal> -->
+</app-custom-modal>
