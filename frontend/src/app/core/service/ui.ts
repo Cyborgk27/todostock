@@ -3,12 +3,21 @@ import Swal, { SweetAlertIcon } from 'sweetalert2';
 
 @Injectable({
   providedIn: 'root',
-  })
+})
 export class Ui {
+  
+  private readonly swalDarkConfig = {
+    background: 'var(--bg-base-100, #1d232a)', 
+    color: 'var(--fallback-bc, #f2f3f5)',      
+    customClass: {
+      popup: 'border border-base-300 rounded-2xl shadow-xl', 
+      title: 'text-xl font-black text-base-content tracking-tight',
+      htmlContainer: 'text-sm text-base-content/70 font-medium',
+    }
+  };
 
   /**
-   * Muestra un toast sutil (notificación flotante) en la esquina superior derecha.
-   * Ideal para acciones rápidas que no deben bloquear al usuario.
+   * Muestra un toast sutil (notificación flotante) adaptado al tema.
    */
   showToast(message: string, icon: SweetAlertIcon = 'success'): void {
     const Toast = Swal.mixin({
@@ -17,6 +26,11 @@ export class Ui {
       showConfirmButton: false,
       timer: 3000,
       timerProgressBar: true,
+      background: this.swalDarkConfig.background,
+      color: this.swalDarkConfig.color,
+      customClass: {
+        popup: 'rounded-xl border border-base-300 shadow-lg font-medium text-sm',
+      },
       didOpen: (toast) => {
         toast.onmouseenter = Swal.stopTimer;
         toast.onmouseleave = Swal.resumeTimer;
@@ -30,18 +44,23 @@ export class Ui {
   }
 
   /**
-   * Muestra una alerta modal clásica (bloqueante).
+   * Muestra una alerta modal clásica (bloqueante) en formato Dark.
    */
   showAlert(title: string, message: string, icon: SweetAlertIcon = 'info'): void {
     Swal.fire({
       title: title,
       text: message,
       icon: icon,
+      background: this.swalDarkConfig.background,
+      color: this.swalDarkConfig.color,
       confirmButtonText: 'Aceptar',
       customClass: {
-        confirmButton: 'btn btn-primary text-white px-6' // 💡 Clases de DaisyUI
+        popup: this.swalDarkConfig.customClass.popup,
+        title: this.swalDarkConfig.customClass.title,
+        htmlContainer: this.swalDarkConfig.customClass.htmlContainer,
+        confirmButton: 'btn btn-primary text-white btn-sm px-6 font-bold uppercase tracking-wide'
       },
-      buttonsStyling: false // Desactiva los estilos por defecto de SweetAlert para usar Tailwind
+      buttonsStyling: false
     });
   }
 
@@ -60,8 +79,8 @@ export class Ui {
   }
 
   /**
-   * Modal de confirmación con promesas. Ideal para flujos como "Eliminar un registro".
-   * Devuelve `true` si el usuario confirma, de lo contrario `false`.
+   * 🗑️ Modal de confirmación con soporte completo para DaisyUI Dark.
+   * Modifica dinámicamente el fondo, títulos y los colores de los botones de control.
    */
   async showConfirm(
     title: string = '¿Estás seguro?',
@@ -73,12 +92,18 @@ export class Ui {
       title: title,
       text: message,
       icon: 'warning',
+      iconColor: '#f87171', // Color suave homologado para alertas destructivas (Tailwind red-400)
       showCancelButton: true,
       confirmButtonText: confirmText,
       cancelButtonText: cancelText,
+      background: this.swalDarkConfig.background,
+      color: this.swalDarkConfig.color,
       customClass: {
-        confirmButton: 'btn btn-error text-white mr-3 px-6', // Botón destructivo con clase DaisyUI
-        cancelButton: 'btn btn-ghost border border-base-300 px-6'
+        popup: this.swalDarkConfig.customClass.popup,
+        title: this.swalDarkConfig.customClass.title,
+        htmlContainer: this.swalDarkConfig.customClass.htmlContainer,
+        confirmButton: 'btn btn-error text-white btn-sm px-6 font-bold uppercase tracking-wide gap-2 shadow-md order-2', 
+        cancelButton: 'btn btn-ghost border border-base-300 btn-sm px-6 font-medium text-xs order-1 mr-3'
       },
       buttonsStyling: false
     });

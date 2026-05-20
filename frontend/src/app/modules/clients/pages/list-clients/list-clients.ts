@@ -5,6 +5,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { TableAction, TableColumn } from '../../../../shared/components/data-table/data-table';
 import { ClientesFacade } from '../../facade/client-facade';
 import { ClientForm } from '../../components/client-form/client-form';
+import { Ui } from '../../../../core/service/ui';
 
 @Component({
   selector: 'app-list-clients',
@@ -13,24 +14,20 @@ import { ClientForm } from '../../components/client-form/client-form';
   styleUrl: './list-clients.css',
 })
 export class ListClients implements OnInit {
-  // Inyectamos la fachada de clientes
   public clientesFacade = inject(ClientesFacade);
+  private ui = inject(Ui);
 
   @ViewChild(ClientForm) clientForm?: ClientForm;
 
-  // Controladores de estado para Modales (DaisyUI + Tailwind)
   public isModalOpen = signal<boolean>(false);
   public isEditing = signal<boolean>(false);
 
-  // Buscador reactivo con debounce interno
   private _searchSubject = new Subject<string>();
 
-  // Título dinámico homologado según la acción activa
   public modalTitle = computed(() =>
     this.isEditing() ? 'Modificar Ficha de Cliente' : 'Registrar Nuevo Cliente'
   );
 
-  // Mapeo riguroso de columnas para tu componente genérico <app-data-table>
   public clientColumns: TableColumn[] = [
     { key: 'identification', label: 'Cédula / RUC', format: 'text' },
     { key: 'name', label: 'Nombres Completos', format: 'text' },
@@ -39,17 +36,14 @@ export class ListClients implements OnInit {
     { key: 'created_at', label: 'Fecha Registro', format: 'date' }
   ];
 
-  // Acciones disponibles en la fila para auditar o dar de baja
   public actions: TableAction[] = [
     { id: 'edit-client', icon: 'pi pi-pencil', tooltip: 'Editar Cliente', colorClass: 'text-warning' },
     { id: 'delete-client', icon: 'pi pi-trash', tooltip: 'Dar de Baja', colorClass: 'text-error' }
   ];
 
   ngOnInit(): void {
-    // Carga inicial de datos desde el servidor
     this.clientesFacade.loadClients();
 
-    // Pipeline reactivo para mitigar peticiones innecesarias al servidor
     this._searchSubject
       .pipe(
         debounceTime(400),
@@ -105,9 +99,17 @@ export class ListClients implements OnInit {
    * Lanza la petición de borrado lógico (Soft Delete)
    */
   public onDeleteClient(clientRow: any): void {
-    if (confirm(`¿Está seguro de que desea eliminar al cliente ${clientRow.name}? No se perderá el histórico de sus facturas.`)) {
-      this.clientesFacade.deleteClient(clientRow.id).subscribe();
-    }
+    this.ui.showConfirm(
+      'Confirmar Baja',
+      `¿Está seguro de que desea eliminar al cliente ${clientRow.name}? No se perderá el histórico de sus facturas.`,
+    ).then((confirmed) => {
+      if (confirmed) {
+        this.clientesFacade.deleteClient(clientRow.id).subscribe({
+          next: () => this.ui.showSuccess(`Cliente ${clientRow.name} eliminado correctamente`),
+          error: () => this.ui.showError(`Error al eliminar al cliente ${clientRow.name}. Intenta nuevamente.`)
+        });
+      }
+    });
   }
 
   /**
