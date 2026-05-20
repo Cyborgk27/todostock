@@ -5,12 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Client\StoreClientRequest;
 use App\Http\Requests\Client\UpdateClientRequest;
 use App\Models\Client;
+use App\Services\ClientService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class ClientController extends Controller
 {
+    public function __construct(
+        protected ClientService $clientService
+    ) {}
+
     #[OA\Get(
         path: "/clients",
         summary: "Obtener listado de clientes paginado",
@@ -86,17 +91,7 @@ class ClientController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $search = $request->query('search');
-
-        $clients = Client::query()
-            ->when($search, function ($query, $search) {
-                $query->where('name', 'ilike', "%{$search}%")
-                      ->orWhere('identification', 'like', "%{$search}%")
-                      ->orWhere('email', 'ilike', "%{$search}%");
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(10);
-
+        $clients = $this->clientService->listClients($request->query('search'));
         return response()->json($clients, 200);
     }
 
@@ -155,7 +150,7 @@ class ClientController extends Controller
      */
     public function store(StoreClientRequest $request): JsonResponse
     {
-        $client = Client::create($request->validated());
+        $client = $this->clientService->createClient($request->validated());
         return response()->json($client, 201);
     }
 
@@ -210,7 +205,7 @@ class ClientController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $client = Client::findOrFail($id);
+        $client = $this->clientService->getClientById($id);
         return response()->json($client, 200);
     }
 
@@ -279,8 +274,7 @@ class ClientController extends Controller
      */
     public function update(UpdateClientRequest $request, int $id): JsonResponse
     {
-        $client = Client::findOrFail($id);
-        $client->update($request->validated());
+        $client = $this->clientService->updateClient($id, $request->validated());
         return response()->json($client, 200);
     }
 
@@ -328,8 +322,7 @@ class ClientController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
-        $client = Client::findOrFail($id);
-        $client->delete();
+        $this->clientService->deleteClient($id);
         return response()->json(['message' => 'Cliente eliminado lógicamente.'], 200);
     }
 }
