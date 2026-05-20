@@ -52,7 +52,7 @@
 
                 @if (showDelete()) {
                   <button
-                    (click)="onDelete.emit(row.id)"
+                    (click)="onDelete.emit(row)"
                     class="btn btn-ghost btn-xs text-error hover:bg-error/10 tooltip gap-1"
                     data-tip="Eliminar"
                   >

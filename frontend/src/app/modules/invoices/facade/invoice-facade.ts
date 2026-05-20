@@ -111,13 +111,12 @@ export class InvoiceFacade {
       .pipe(finalize(() => this._isSaving.set(false)))
       .subscribe({
         next: (response) => {
-          // Refrescamos la lista para ver reflejada la venta decremetada del inventario
           this.loadInvoices();
           if (onSuccess) onSuccess();
+          this._uiService.showToast(response.message || 'Factura creada exitosamente');
         },
         error: (err) => {
-          console.error('Error en la transacción de venta:', err);
-          this._uiService.showToast('Error al procesar la venta. Intenta nuevamente.');
+          this._uiService.showToast(err.error?.message || 'Error al crear la factura. Intenta nuevamente.', 'error');
         }
       });
   }

@@ -1,6 +1,10 @@
 @if (isOpen()) {
   <div class="modal modal-open backdrop-blur-sm transition-all duration-300 animate-fadeIn">
-    <div class="modal-box bg-base-100 border border-base-300 shadow-2xl relative max-w-lg w-full">
+    
+    <div 
+      class="modal-box bg-base-100 border border-base-300 shadow-2xl relative w-11/12 transition-all duration-300"
+      [ngClass]="sizeClass()"
+    >
       
       <div class="flex items-center justify-between border-b border-base-300 pb-3 mb-4">
         <h3 class="text-lg font-black tracking-tight text-base-content">

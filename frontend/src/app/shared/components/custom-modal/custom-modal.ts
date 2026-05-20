@@ -12,6 +12,8 @@ export class CustomModal {
 
   onClose = output<void>();
 
+  sizeClass = input<string>('max-w-lg');
+
   closeModal(): void {
     this.isOpen.set(false);
     this.onClose.emit();

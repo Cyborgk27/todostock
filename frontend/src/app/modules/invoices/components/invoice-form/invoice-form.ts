@@ -3,6 +3,8 @@ import { Component, computed, inject, input, OnInit, signal } from '@angular/cor
 import { StoreInvoiceRequest } from '../../../../core/api';
 import { InvoiceFacade } from '../../facade/invoice-facade';
 import { TableColumn } from '../../../../shared/components/data-table/data-table';
+import { ClientesFacade } from '../../../clients/facade/client-facade';
+import { ProductosFacade } from '../../../products/facade/product-facade';
 
 interface FormItem {
   product_id: number;
@@ -21,26 +23,34 @@ interface FormItem {
 })
 export class InvoiceForm implements OnInit {
   private _invoiceFacade = inject(InvoiceFacade);
+  // Hacemos públicos los facades para leer sus signals directamente desde el HTML (.clients() y .products())
+  public clientFacade = inject(ClientesFacade);
+  public productFacade = inject(ProductosFacade);
 
-  // Input para saber si el modal está en modo consulta de detalle (Solo Lectura)
   public readOnly = input<boolean>(false);
 
   // ─── STATE SIGNALS DEL FORMULARIO ──────────────────────────────────
   public clientName = signal<string>('');
   public clientIdentification = signal<string>('');
 
-  // Detalle de la venta actual (items del carrito)
-  public invoiceItems = signal<FormItem[]>([]);
+  // Almacena la entidad del cliente seleccionado desde el autocompletado
+  public selectedClient = signal<any>(null);
 
-  // Estado para la barra de búsqueda rápida de productos dentro del POS
+  // Producto actualmente seleccionado listo para ser añadido con su cantidad customizada
+  public selectedProduct = signal<any>(null);
+  public inputQuantity = signal<number>(1);
+
+  public invoiceItems = signal<FormItem[]>([]);
   public productSearchQuery = signal<string>('');
 
-  // Signals para congelar los totales exactos del JSON cuando es solo lectura
   private _historicalSubtotal = signal<number>(0);
   private _historicalTax = signal<number>(0);
   private _historicalTotal = signal<number>(0);
 
-  // ─── COMPUTED SIGNALS PARA TOTALES (VENTA NUEVA O HISTÓRICA) ───────
+  // Flags para controlar la apertura visual de los dropdowns de sugerencias
+  public showClientDropdown = signal<boolean>(false);
+  public showProductDropdown = signal<boolean>(false);
+
   public subtotal = computed(() => {
     if (this.readOnly()) return this._historicalSubtotal();
     return this.invoiceItems().reduce((acc, item) => acc + item.subtotal, 0);
@@ -48,7 +58,7 @@ export class InvoiceForm implements OnInit {
 
   public tax = computed(() => {
     if (this.readOnly()) return this._historicalTax();
-    return this.subtotal() * 0.15; // IVA transaccional del negocio
+    return this.subtotal() * 0.15;
   });
 
   public total = computed(() => {
@@ -59,9 +69,9 @@ export class InvoiceForm implements OnInit {
   public itemColumns: TableColumn[] = [
     { key: 'name', label: 'Item / Producto' },
     { key: 'sku', label: 'SKU' },
-    { key: 'quantity', label: 'Cantidad', },
-    { key: 'price', label: 'P. Unitario', format: 'currency', },
-    { key: 'subtotal', label: 'Subtotal', format: 'currency', }
+    { key: 'quantity', label: 'Cantidad' },
+    { key: 'price', label: 'P. Unitario', format: 'currency' },
+    { key: 'subtotal', label: 'Subtotal', format: 'currency' }
   ];
 
   ngOnInit(): void {
@@ -69,7 +79,7 @@ export class InvoiceForm implements OnInit {
       const selected = this._invoiceFacade.selectedInvoice();
       if (selected) {
         this.clientName.set(selected.client?.name ?? 'Sin Cliente registrado');
-        this.clientIdentification.set(selected.client.identification ?? 'N/A');
+        this.clientIdentification.set(selected.client?.identification ?? 'N/A');
 
         this._historicalSubtotal.set(Number(selected.subtotal ?? 0));
         this._historicalTax.set(Number(selected.tax_total ?? 0));
@@ -89,10 +99,29 @@ export class InvoiceForm implements OnInit {
     }
   }
 
-  // ─── ACCIONES DEL PUNTO DE VENTA (POS) ─────────────────────────────
+  // ─── ACCIONES AUTOCM_PLETADO Y SELECCIÓN ───────────────────────────
 
-  public addProductToInvoice(product: any): void {
-    if (this.readOnly()) return;
+  public selectClientFromList(client: any): void {
+    this.selectedClient.set(client);
+    this.clientName.set(client.name);
+    this.clientIdentification.set(client.identification);
+    this.showClientDropdown.set(false);
+  }
+
+  public selectProductFromList(product: any): void {
+    this.selectedProduct.set(product);
+    this.productSearchQuery.set(`${product.name} (${product.sku})`);
+    this.showProductDropdown.set(false);
+  }
+
+  /**
+   * Agrega el producto seleccionado con la cantidad ingresada en el modal
+   */
+  public addProductToInvoice(): void {
+    const product = this.selectedProduct();
+    const qty = this.inputQuantity();
+
+    if (!product || qty < 1 || this.readOnly()) return;
 
     const currentItems = this.invoiceItems();
     const existingItem = currentItems.find(item => item.product_id === product.id);
@@ -101,7 +130,7 @@ export class InvoiceForm implements OnInit {
       this.invoiceItems.set(
         currentItems.map(item =>
           item.product_id === product.id
-            ? { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * item.price }
+            ? { ...item, quantity: item.quantity + qty, subtotal: (item.quantity + qty) * item.price }
             : item
         )
       );
@@ -112,18 +141,25 @@ export class InvoiceForm implements OnInit {
           product_id: product.id,
           name: product.name,
           sku: product.sku,
-          quantity: 1,
-          price: product.sale_price,
-          subtotal: product.sale_price
+          quantity: qty,
+          price: Number(product.price ?? 0), // O product.sale_price de acuerdo a tu modelo OpenAPI
+          subtotal: Number(product.price ?? 0) * qty
         }
       ]);
     }
+
+    // Resetear campos de inserción limpia
+    this.selectedProduct.set(null);
     this.productSearchQuery.set('');
+    this.inputQuantity.set(1);
   }
 
-  public removeItem(productId: number): void {
+  public removeItem(event: any): void {
     if (this.readOnly()) return;
-    this.invoiceItems.set(this.invoiceItems().filter(item => item.product_id !== productId));
+
+    const updatedItems = this.invoiceItems().filter(item => item.product_id !== event.product_id);
+
+    this.invoiceItems.set(updatedItems);
   }
 
   public updateQuantity(productId: number, quantity: number): void {
@@ -134,14 +170,18 @@ export class InvoiceForm implements OnInit {
         item.product_id === productId
           ? { ...item, quantity: quantity, subtotal: quantity * item.price }
           : item
-      )
-    );
+      ));
   }
 
   public submitInvoice(onSuccessCallback: () => void): void {
-    const selected = this._invoiceFacade.selectedInvoice();
+    const client = this.selectedClient();
+    if (!client && !this.readOnly()) {
+      alert('Por favor, selecciona un cliente válido usando el autocompletado.');
+      return;
+    }
+
     const requestPayload: StoreInvoiceRequest = {
-      client_id: selected?.client?.id ?? 0,
+      client_id: client.id,
       items: this.invoiceItems().map(item => ({
         product_id: item.product_id,
         quantity: item.quantity,
@@ -158,6 +198,10 @@ export class InvoiceForm implements OnInit {
   private resetForm(): void {
     this.clientName.set('');
     this.clientIdentification.set('');
+    this.selectedClient.set(null);
+    this.selectedProduct.set(null);
+    this.productSearchQuery.set('');
+    this.inputQuantity.set(1);
     this.invoiceItems.set([]);
     this._historicalSubtotal.set(0);
     this._historicalTax.set(0);
@@ -166,13 +210,27 @@ export class InvoiceForm implements OnInit {
 
   public updateClientIdentification(value: string | number): void {
     this.clientIdentification.set(String(value));
+    if (String(value).length >= 3) {
+      this.clientFacade.loadClients(String(value), 1);
+      this.showClientDropdown.set(true);
+    }
   }
 
   public updateClientName(value: string | number): void {
     this.clientName.set(String(value));
+    if (String(value).length >= 3) {
+      this.clientFacade.loadClients(String(value), 1);
+      this.showClientDropdown.set(true);
+    }
   }
 
   public onSearchProductChange(value: string | number): void {
     this.productSearchQuery.set(String(value));
+    if (String(value).length >= 2) {
+      this.productFacade.loadProducts(String(value), 1);
+      this.showProductDropdown.set(true);
+    } else {
+      this.selectedProduct.set(null); // Limpia selección si borra el texto
+    }
   }
 }

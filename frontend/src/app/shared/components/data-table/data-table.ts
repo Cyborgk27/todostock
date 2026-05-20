@@ -29,7 +29,7 @@ export class DataTable {
 
   // Outputs para acciones transaccionales
   onEdit = output<any>();
-  onDelete = output<number>();
+  onDelete = output<any>();
   onActionClick = output<{ actionId: string; row: any }>();
 
   public getCellValue(row: any, key: string): any {

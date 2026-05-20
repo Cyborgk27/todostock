@@ -57,6 +57,7 @@
   (isOpenChange)="isModalOpen.set($event)"
   [title]="modalTitle()"
   (onClose)="onCloseModal()"
+  sizeClass="max-w-4xl"
 >
   @if (invoiceFacade.isLoading() && isViewingDetail()) {
     <div class="flex flex-col justify-center items-center py-12 gap-2">
