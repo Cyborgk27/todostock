@@ -1,0 +1,100 @@
+<div class="p-6 space-y-6 animate-fade-in">
+  <div
+    class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-base-100 p-4 rounded-xl border border-base-300 shadow-xs"
+  >
+    <div>
+      <h2 class="text-xl font-black text-base-content tracking-tight">Catálogo de Clientes</h2>
+      <p class="text-xs text-base-content/60 font-medium">
+        Gestión integral, auditoría y registro fiscal de carteras de clientes.
+      </p>
+    </div>
+    <button
+      (click)="onNewClient()"
+      class="btn btn-primary btn-sm text-white font-bold tracking-wide uppercase shadow-md"
+    >
+      <i class="pi pi-user-plus text-xs"></i>
+      Nuevo Cliente
+    </button>
+  </div>
+
+  <div class="bg-base-100 p-4 rounded-xl border border-base-300 shadow-xs">
+    <div class="w-full md:w-96">
+      <app-custom-input
+        [value]="clientesFacade.searchQuery()"
+        (valueChange)="onSearchChange($event)"
+        placeholder="Buscar por cédula, RUC, nombre o email..."
+        type="text"
+        icon="pi-search"
+      >
+      </app-custom-input>
+    </div>
+  </div>
+
+  <div class="bg-base-100 rounded-xl border border-base-300 shadow-xs overflow-hidden">
+    @if (clientesFacade.isLoading() && !isModalOpen()) {
+      <div class="flex flex-col justify-center items-center py-24 gap-3">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="text-xs text-base-content/60 font-semibold uppercase tracking-widest">
+          Sincronizando base de datos...
+        </p>
+      </div>
+    } @else {
+      <app-data-table
+        [columns]="clientColumns"
+        [data]="clientesFacade.clients()"
+        [actions]="actions"
+        (onActionClick)="onActionClick($event)"
+        [showEdit]="false"
+        [showDelete]="false"
+      >
+      </app-data-table>
+
+      <div
+        class="p-4 border-t border-base-200 flex flex-col sm:flex-row justify-between items-center bg-base-50/50 gap-3"
+      >
+        <span class="text-xs font-medium text-base-content/60 order-2 sm:order-1">
+          Total:
+          <b class="text-base-content font-bold">{{ clientesFacade.pagination().total }}</b>
+          registros encontrados
+        </span>
+
+        <div class="order-1 sm:order-2">
+          <app-single-pagination
+            [currentPage]="clientesFacade.pagination().currentPage"
+            [lastPage]="clientesFacade.pagination().lastPage"
+            (onPageChange)="onPageChange($event)"
+          >
+          </app-single-pagination>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<app-custom-modal
+  [isOpen]="isModalOpen()"
+  (isOpenChange)="isModalOpen.set($event)"
+  [title]="modalTitle()"
+  (onClose)="onCloseModal()"
+>
+  <app-client-form></app-client-form>
+
+  <div class="flex justify-end gap-2 pt-6 border-t border-base-300 mt-6">
+    <button (click)="onCloseModal()" class="btn btn-ghost btn-sm">
+      Cancelar
+    </button>
+    
+    <button
+      [disabled]="clientesFacade.isLoading()"
+      (click)="handleSave()"
+      class="btn btn-primary btn-sm text-white px-8"
+    >
+      @if (clientesFacade.isLoading()) {
+        <span class="loading loading-spinner loading-xs mr-2"></span>
+      } @else {
+        <i class="pi pi-save mr-2 text-xs"></i>
+      }
+      {{ isEditing() ? 'Actualizar Cliente' : 'Registrar Cliente' }}
+    </button>
+  </div>
+</app-custom-modal>

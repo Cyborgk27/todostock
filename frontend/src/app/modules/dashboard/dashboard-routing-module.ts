@@ -9,7 +9,7 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'products', // Redirige por defecto al catálogo al entrar a /dashboard
+        redirectTo: 'products',
         pathMatch: 'full'
       },
       {
@@ -20,6 +20,10 @@ const routes: Routes = [
         path: 'invoices',
         loadChildren: () => import('../invoices/invoices-module').then(m => m.InvoicesModule)
       },
+      {
+        path: 'clients',
+        loadChildren: () => import('../clients/clients-module').then(m => m.ClientsModule)
+      }
     ]
   }
 ];

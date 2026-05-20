@@ -1,0 +1,58 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  
+  <div class="md:col-span-2">
+    <app-custom-input
+      [value]="name()"
+      (valueChange)="updateField('name', $event)"
+      label="Nombres Completos"
+      placeholder="Ej: Josh Ryan"
+      icon="pi-user"
+      [required]="true"
+      [disabled]="readOnly()">
+    </app-custom-input>
+  </div>
+
+  <app-custom-input
+    [value]="identification()"
+    (valueChange)="updateField('id', $event)"
+    label="Cédula / RUC"
+    placeholder="Ej: 0999999999"
+    icon="pi-id-card"
+    [required]="true"
+    [disabled]="readOnly()">
+  </app-custom-input>
+
+  <app-custom-input
+    [value]="email()"
+    (valueChange)="updateField('email', $event)"
+    label="Correo Electrónico"
+    placeholder="Ej: josh.ryan@example.com"
+    type="email"
+    icon="pi-envelope"
+    [required]="true"
+    [disabled]="readOnly()">
+  </app-custom-input>
+
+  <app-custom-input
+    [value]="phone()"
+    (valueChange)="updateField('phone', $event)"
+    label="Teléfono / Celular"
+    placeholder="Ej: 0987654321"
+    icon="pi-phone"
+    [disabled]="readOnly()">
+  </app-custom-input>
+
+  <div class="md:col-span-2">
+    <label class="label">
+      <span class="label-text font-bold text-base-content/70 text-sm">Dirección Domiciliaria</span>
+    </label>
+    <textarea
+      class="textarea textarea-bordered w-full bg-base-100 focus:textarea-primary min-h-[80px] text-sm transition-all"
+      [value]="address()"
+      (input)="updateField('address', $any($event.target).value)"
+      [disabled]="readOnly()"
+      placeholder="Escriba la dirección completa para el registro fiscal...">
+    </textarea>
+  </div>
+
+</div>
